@@ -101,7 +101,7 @@ while not game_over:
                     fire_y_change = -15
                 elif third_move:
                     b2 = np.sqrt(rect_Q_x / (size_x - rect_h))
-                    a2 = np.sqrt(1 - np.square(b1))
+                    a2 = np.sqrt(1 - np.square(b2))
                     move_Q += 1
                     fire_y_change = 15
 
@@ -158,9 +158,9 @@ while not game_over:
         screen.blit(text_size_, [150, 20])
         # display P's 1st choice
         text_rect_P_x = font.render("Prob(flip): " + str(rect_P_x / (size_x - rect_h)), True, (0, 0, 0))
-        screen.blit(text_rect_P_x, [150, size_y - 100])
+        screen.blit(text_rect_P_x, [150, size_y - 50])
         text_size_ = font.render("Prob(not flip): " + str(1 - rect_P_x / (size_x - rect_h)), True, (0, 0, 0))
-        screen.blit(text_size_, [150, size_y - 50])
+        screen.blit(text_size_, [150, size_y - 100])
     elif third_move:
         # display Q's 1st choice
         text_rect_Q_x = font.render("|b|^2: " + str(np.square(b1)), True, (0, 0, 0))
@@ -169,9 +169,9 @@ while not game_over:
         screen.blit(text_size_, [150, 20])
         # display P's 1st choice
         text_rect_P_x = font.render("Prob(flip): " + str(picard_prob), True, (0, 0, 0))
-        screen.blit(text_rect_P_x, [150, size_y - 100])
+        screen.blit(text_rect_P_x, [150, size_y - 50])
         text_size_ = font.render("Prob(not flip): " + str(1 - picard_prob), True, (0, 0, 0))
-        screen.blit(text_size_, [150, size_y - 50])
+        screen.blit(text_size_, [150, size_y - 100])
         # display Q's potential 2nd choice
         text_rect_Q_x = font.render("|b|^2: " + str(rect_Q_x / (size_x - rect_h)), True, (0, 0, 0))
         screen.blit(text_rect_Q_x, [size_x - 400, 50])
@@ -186,13 +186,13 @@ while not game_over:
         screen.blit(text_size_, [150, 20])
         # display P's 1st choice
         text_rect_P_x = font.render("Prob(flip): " + str(picard_prob), True, (0, 0, 0))
-        screen.blit(text_rect_P_x, [150, size_y - 100])
+        screen.blit(text_rect_P_x, [150, size_y - 50])
         text_size_ = font.render("Prob(not flip): " + str(1 - picard_prob), True, (0, 0, 0))
-        screen.blit(text_size_, [150, size_y - 50])
+        screen.blit(text_size_, [150, size_y - 100])
         # display Q's 2nd choice
         text_rect_Q_x = font.render("|b|^2: " + str(np.square(b2)), True, (0, 0, 0))
         screen.blit(text_rect_Q_x, [size_x - 400, 50])
-        text_size_ = font.render("|a|^2: " + str(1 - rect_Q_x / (size_x - rect_h)), True, (0, 0, 0))
+        text_size_ = font.render("|a|^2: " + str(np.square(a2)), True, (0, 0, 0))
         screen.blit(text_size_, [size_x - 400, 20])
         # program is now ready to be run
         run_quantum_program = True
