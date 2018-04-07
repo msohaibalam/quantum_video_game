@@ -14,6 +14,7 @@ blue = (0, 0, 255)
 red_blue = (255, 0, 255)
 red_green = (255, 255, 0)
 blue_green = (0, 255, 255)
+black = (0, 0, 0)
 color_code = 0
 dartboard_A_color = (127.5, 127.5, 127.5)
 # boolean controling when game stops
@@ -26,15 +27,20 @@ size_x = 1000
 size_y = 625
 size = (size_x, size_y)
 # dartboard parameters
-radius_outer = 100
-radius_1st_inner = 60
-radius_2nd_inner = 20
-width = 20
+radius_outer = 75
+width = 15
+radius_1st_inner = radius_outer - 2 * width  # 60
+radius_2nd_inner = radius_outer - 4 * width  # 20
 
+# initialize program with random measurement of either 0 or 1
 p = Program(H(0)).measure(0, [0])
 results_A = qvm.run(p, [0])
-
 results_B = []
+
+
+# helper function to generate unitary matrix
+def U_(a, b):
+    return np.array([[a, b], [b, -a]])
 
 # initialize pygame
 pygame.init()
@@ -46,6 +52,11 @@ clock = pygame.time.Clock()
 # define font
 font = pygame.font.SysFont('Calibri', 25, True)
 
+# keep track of score and score text, as well as attempts
+str_text_score = ''
+score = 0
+attempts = 0
+
 while not game_over:
 
     for event in pygame.event.get():
@@ -53,6 +64,30 @@ while not game_over:
             game_over = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
+                # comparison stage
+                if color_code % 3 == 2:
+                    mouse_pos = pygame.mouse.get_pos()
+                    print ("Clicked Mouse pos: ", mouse_pos)
+                    if (mouse_pos[0] >= size_x//2 - radius_outer) and (mouse_pos[0] <= size_x//2 + radius_outer):
+                        if (mouse_pos[1] >= size_y//2 - 150 - radius_outer) and (mouse_pos[1] <= size_y//2 - 150 + radius_outer):
+                            if results_A == [[0]]:
+                                str_text_score = "SCORE!!"
+                                score += 1
+                            elif results_A == [[1]]:
+                                str_text_score = "........POOR............"
+                        elif (mouse_pos[1] >= size_y//2 + 150 - radius_outer) and (mouse_pos[1] <= size_y//2 + 150 + radius_outer):
+                            if results_A == [[0]]:
+                                str_text_score = "........POOR............"
+                            elif results_A == [[1]]:
+                                str_text_score = "SCORE!!"
+                                score += 1
+                        else:
+                            str_text_score = "Missed the target...MAJOR FAIL!!"
+                            score -= 1
+                    else:
+                        str_text_score = "Missed the target...MAJOR FAIL!!"
+                        score -= 1
+                    attempts += 1
                 color_code += 1
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
@@ -65,9 +100,7 @@ while not game_over:
         # empty out results from dartboard_B
         if len(results_B) > 0:
             results_B.pop()
-        text_results = font.render("results_A: " + str(results_A), True, (0, 0, 0))
-        screen.blit(text_results, [500, 500])
-        # set darboard_A centers, and calculate results_B in either case
+        # set dartboard_A center, and calculate results_B in either case
         if results_A == [[0]]:
             dartboard_A_center = [size_x//2, size_y//2 - 150]
             p = Program(I(0), H(0)).measure(0, [0])
@@ -76,14 +109,11 @@ while not game_over:
             dartboard_A_center = [size_x//2, size_y//2 + 150]
             p = Program(X(0), H(0)).measure(0, [0])
             results_B = qvm.run(p, [0])
-        print ("Results A: ", results_A)
 
     elif color_code % 3 == 1:
         screen.fill(red)
         if len(results_A) > 0:
             results_A.pop()
-        text_results = font.render("results_B: " + str(results_B), True, (0, 0, 0))
-        screen.blit(text_results, [500, 500])
         # set dartboard_B centers
         if results_B == [[0]]:
             dartboard_B_center = [size_x//2 + 150, size_y//2]
@@ -93,7 +123,6 @@ while not game_over:
             dartboard_B_center = [size_x//2 - 150, size_y//2]
             p = Program(X(0), H(0)).measure(0, [0])
             results_A = qvm.run(p, [0])
-        print ("Results_B: ", results_B)
 
     elif color_code % 3 == 2:
         screen.fill(blue)
@@ -101,10 +130,8 @@ while not game_over:
     pressed = pygame.mouse.get_pressed()
     mouse_pos = pygame.mouse.get_pos()
 
-    text_mouse = font.render("mouse buttons: " + str(pressed), True, (0, 0, 0))
-    screen.blit(text_mouse, [size_x//2, size_y//2])
-    text_mouse_pos = font.render("mouse position: " + str(mouse_pos), True, (0, 0, 0))
-    screen.blit(text_mouse_pos, [100, 100])
+    text_score = font.render(str_text_score, True, black)
+    screen.blit(text_score, [100, size_y//2])
 
     # draw dartboard
     if color_code % 3 == 0:
@@ -117,6 +144,12 @@ while not game_over:
         pygame.draw.circle(screen, dartboard_A_color, dartboard_B_center, radius_2nd_inner, width)
     elif color_code % 3 == 2:
         pygame.draw.circle(screen, dartboard_A_color, dartboard_A_center, radius_outer, 10)
+
+    # display Score
+    text_score = font.render("Score: " + str(score), True, black)
+    screen.blit(text_score, [size_x - 150, 20])
+    text_attempts = font.render("Attempts: " + str(attempts), True, black)
+    screen.blit(text_attempts, [size_x - 150, 40])
 
     pygame.display.flip()
 
